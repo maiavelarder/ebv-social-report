@@ -4,7 +4,7 @@
 window.EBV_CONFIG = {
   // 1. Paste your Google Sheet "Publish to web" CSV link between the quotes.
   //    Leave empty to use data.csv from this repository.
-  SHEET_CSV_URL: "",
+  SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc_mnrLxTTetez0gJikb2DuxTrmXnNnL3rhG8LAEiqkIA7O1gK9fy5K5cXlydq_J7c0QxNbFktv50l/pub?output=csv",
 
   // 2. Password hash. Current password: ebv2026
   //    To change it, open make-password.html, type a new password and paste the result here.

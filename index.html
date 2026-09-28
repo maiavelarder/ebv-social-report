@@ -93,6 +93,10 @@ th:first-child,td:first-child{text-align:left}
 #gate .err{color:var(--bad);font-size:12px;min-height:18px}
 #status{font-size:12px;color:var(--text2);margin:10px 0}
 .section-gap{margin-top:14px}
+.sec{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text2);font-weight:600;margin:28px 0 10px}
+.hero{border-top:3px solid var(--accent)}
+.kpis .card:nth-child(-n+2) .k-val{font-size:38px}
+.kpis .card:nth-child(-n+2){border-top:3px solid var(--accent)}
 @media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.main{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:480px){h1{font-size:28px}.k-val{font-size:24px}.hbar{grid-template-columns:90px minmax(0,1fr) 44px}}
 @media print{.controls .btn,.controls .seg,#tip{display:none}.controls{position:static}body{background:#fff}.card{break-inside:avoid}}
@@ -141,7 +145,36 @@ th:first-child,td:first-child{text-align:left}
     <p id="summaryText"></p>
   </section>
 
-  <section class="grid main section-gap">
+  <h3 class="sec">Performance</h3>
+  <section class="grid two">
+    <div class="card hero">
+      <h2>Reach</h2>
+      <div class="desc">Unique accounts that saw EBV content each month. Peaks line up with paid promotion.</div>
+      <div class="chart" id="cReach"></div>
+    </div>
+    <div class="card hero">
+      <h2>Engagement rate</h2>
+      <div class="desc">Interactions ÷ reach. Read it next to reach: it rises when reach falls.</div>
+      <div class="chart" id="cER"></div>
+    </div>
+  </section>
+
+  <h3 class="sec">Booking intent</h3>
+  <section class="grid two">
+    <div class="card">
+      <h2>Profile visits</h2>
+      <div class="desc">People who opened the EBV profile after seeing content.</div>
+      <div class="chart" id="cVisits"></div>
+    </div>
+    <div class="card">
+      <h2>Link clicks</h2>
+      <div class="desc">Clicks on the profile link toward the website.</div>
+      <div class="chart" id="cClicks"></div>
+    </div>
+  </section>
+
+  <h3 class="sec">Audience</h3>
+  <section class="grid main">
     <div class="card">
       <h2>Monthly growth rate</h2>
       <div class="desc">Percent change in followers each month. Faded blue bars use an estimated country split.</div>
@@ -176,15 +209,11 @@ th:first-child,td:first-child{text-align:left}
       <div class="chart" id="cFlow"></div>
     </div>
     <div class="card">
-      <h2>Activity</h2>
-      <div class="desc">Monthly totals for the selected metric. Instagram only.</div>
-      <div class="seg" id="fMetric" style="margin-bottom:8px;flex-wrap:wrap">
-        <button data-m="reach" aria-pressed="true">Reach</button>
-        <button data-m="views" aria-pressed="false">Views</button>
+      <h2>More metrics</h2>
+      <div class="desc">Monthly totals. Instagram only.</div>
+      <div class="seg" id="fMetric" style="margin-bottom:8px">
+        <button data-m="views" aria-pressed="true">Views</button>
         <button data-m="interactions" aria-pressed="false">Interactions</button>
-        <button data-m="er" aria-pressed="false">Engagement rate</button>
-        <button data-m="profile_visits" aria-pressed="false">Profile visits</button>
-        <button data-m="link_clicks" aria-pressed="false">Link clicks</button>
       </div>
       <div class="chart" id="cActivity"></div>
     </div>
@@ -261,7 +290,7 @@ async function loadData(){
 }
 
 /* ---------- state ---------- */
-let ALL=[], S={platform:null,range:12,month:null,metric:'reach'}, SRC=null;
+let ALL=[], S={platform:null,range:12,month:null,metric:'views'}, SRC=null;
 const LOCAL=CFG.LOCAL_COUNTRY_COLUMN;
 const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const mLabel=(m,long)=>{ const [y,mo]=m.split('-'); return MN[+mo-1]+(long?' '+y:''); };
@@ -299,8 +328,8 @@ function niceTicks(lo,hi,n=4){ if(lo===hi){lo-=1;hi+=1;} const span=hi-lo, step0
 function frame(el,H){ const W=Math.max(280,el.clientWidth||600); return {W,H,L:52,R:12,T:10,B:26}; }
 function xLabels(rows,f,xAt){ const every=Math.ceil(rows.length/(f.W<520?6:12)); const last=rows.length-1; return rows.map((r,i)=>(i===last||(i%every===0&&last-i>=Math.max(1,every*0.6)))?'<text x="'+xAt(i)+'" y="'+(f.H-6)+'" text-anchor="middle">'+mLabel(r.month)+(r.month.endsWith('-01')||i===0?" '"+r.month.slice(2,4):'')+'</text>':'').join(''); }
 
-function lineChart(el,rows,key,color,fmtY,label,estDash){
-  const f=frame(el,220); const vals=rows.map(r=>r[key]); const valid=vals.filter(v=>v!=null);
+function lineChart(el,rows,key,color,fmtY,label,estDash,H){
+  const f=frame(el,H||220); const vals=rows.map(r=>r[key]); const valid=vals.filter(v=>v!=null);
   if(!valid.length){ el.innerHTML='<div class="note">No data for this metric yet.</div>'; return; }
   const ticks=niceTicks(Math.min(...valid),Math.max(...valid)); const lo=ticks[0],hi=ticks[ticks.length-1];
   const iw=f.W-f.L-f.R, ih=f.H-f.T-f.B; const xAt=i=>f.L+(rows.length===1?iw/2:i*iw/(rows.length-1)); const yAt=v=>f.T+ih-(v-lo)/(hi-lo)*ih;
@@ -384,20 +413,28 @@ function render(){
   if(!ALL.length) return;
   const {rows,cur}=view(); if(!cur) return;
   const first=rows[0]; const shareChange=(cur.share!=null&&first.share!=null)?cur.share-first.share:null;
+  const prev=view().prev;
+  const chg=(key,d=1)=>{ if(!prev||prev[key]==null||!prev[key]||cur[key]==null) return ['–','flat']; const g=(cur[key]-prev[key])/prev[key]*100; return [arrow(g)+pct(g,d)+' vs last month'+(cur.partial?' (to date)':''),dir(g)]; };
+  const erPts=(prev&&prev.er!=null&&cur.er!=null)?cur.er-prev.er:null;
   document.getElementById('kpis').innerHTML=
-    kpi('All followers',fmt(cur.followers),arrow(cur.gAll)+pct(cur.gAll)+' vs last month ('+signed(cur.netAll)+')',dir(cur.gAll),'k-all')+
-    kpi('Followers excluding Costa Rica',fmt(cur.intl),arrow(cur.gIntl)+pct(cur.gIntl)+' vs last month ('+signed(cur.netIntl)+')',dir(cur.gIntl),'k-intl')+
-    kpi('Reach',fmt(cur.reach),(()=>{const p=view().prev; if(!p||!p.reach||cur.reach==null) return '–'; const g=(cur.reach-p.reach)/p.reach*100; return arrow(g)+pct(g,1)+' vs last month'+(cur.partial?' (to date)':'');})(),(()=>{const p=view().prev; return p&&p.reach&&cur.reach!=null?dir(cur.reach-p.reach):'flat';})())+
-    kpi('Engagement rate',cur.er==null?'–':cur.er.toFixed(1)+'%','Interactions ÷ reach · '+fmt(cur.interactions)+' interactions','flat');
+    kpi('Reach',fmt(cur.reach),...chg('reach'))+
+    kpi('Engagement rate',cur.er==null?'–':cur.er.toFixed(1)+'%',erPts==null?'–':arrow(erPts)+(erPts>0?'+':'')+erPts.toFixed(1)+' pts vs last month · '+fmt(cur.interactions)+' interactions',dir(erPts))+
+    kpi('Profile visits',fmt(cur.profile_visits),...chg('profile_visits'))+
+    kpi('Followers excluding Costa Rica',fmt(cur.intl),arrow(cur.gIntl)+pct(cur.gIntl)+' vs last month ('+signed(cur.netIntl)+') · '+fmt(cur.followers)+' total',dir(cur.gIntl),'k-intl');
   const sc=document.getElementById('summaryCard'); sc.hidden=!cur.notes; document.getElementById('summaryText').textContent=cur.notes;
   growthChart(document.getElementById('cGrowth'),rows);
   countries(document.getElementById('cCountries'),cur);
   const k=v=>fmt(v);
+  const pctF=v=>v.toFixed(v%1?1:0)+'%';
+  lineChart(document.getElementById('cReach'),rows,'reach',css('--accent'),k,'Reach',false,260);
+  lineChart(document.getElementById('cER'),rows,'er',css('--accent'),pctF,'Engagement rate',false,260);
+  lineChart(document.getElementById('cVisits'),rows,'profile_visits',css('--accent'),k,'Profile visits');
+  lineChart(document.getElementById('cClicks'),rows,'link_clicks',css('--accent'),k,'Link clicks');
   lineChart(document.getElementById('cIntl'),rows,'intl',css('--intl'),k,'Excl. Costa Rica',true);
   lineChart(document.getElementById('cAll'),rows,'followers',css('--all'),k,'All followers');
   flowChart(document.getElementById('cFlow'),rows);
-  const mNames={reach:'Reach',views:'Views',interactions:'Interactions',er:'Engagement rate',profile_visits:'Profile visits',link_clicks:'Link clicks'};
-  lineChart(document.getElementById('cActivity'),rows,S.metric,css('--accent'),S.metric==='er'?(v=>v.toFixed(v%1?1:0)+'%'):k,mNames[S.metric]);
+  const mNames={views:'Views',interactions:'Interactions'};
+  lineChart(document.getElementById('cActivity'),rows,S.metric,css('--accent'),k,mNames[S.metric]);
   const t=document.getElementById('tbl');
   const badges=r=>(r.estimated?'<span class="est" title="Country split estimated">EST</span>':'')+(r.partial?'<span class="est">PARTIAL</span>':'');
   t.innerHTML='<thead><tr><th>Month</th><th>All followers</th><th>Gained</th><th>Lost</th><th>Net</th><th>Growth</th><th>Excl. Costa Rica</th><th>Net</th><th>Growth</th><th>Views</th><th>Reach</th><th>Interactions</th><th>Eng. rate</th><th>Profile visits</th><th>Link clicks</th></tr></thead><tbody>'+
