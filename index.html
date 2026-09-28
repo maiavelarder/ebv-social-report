@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>EBV Social Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{
+  color-scheme:light;
+  --page:#f6f4ef; --card:#ffffff; --line:#e7e4dc; --grid:#eeebe4;
+  --text:#1d1c1a; --text2:#5b5a55; --muted:#8a8983;
+  --intl:#2a78d6; --all:#eb6834; --local:#d6d3cb; --accent:#0f4c5c;
+  --good:#1e7b45; --bad:#b3261e; --est-bg:#fdf3dc; --est-text:#8a5a00;
+  --tip:#1d1c1a; --tip-text:#ffffff;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --page:#121211; --card:#1a1a19; --line:#2e2e2b; --grid:#262624;
+    --text:#ffffff; --text2:#c3c2b7; --muted:#8f8e86;
+    --intl:#3987e5; --all:#d95926; --local:#3d3d39; --accent:#7fc4d4;
+    --good:#5cc78a; --bad:#f08a84; --est-bg:#3a2f14; --est-text:#f2c46b;
+    --tip:#f4f3ef; --tip-text:#121211;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --page:#121211; --card:#1a1a19; --line:#2e2e2b; --grid:#262624;
+  --text:#ffffff; --text2:#c3c2b7; --muted:#8f8e86;
+  --intl:#3987e5; --all:#d95926; --local:#3d3d39; --accent:#7fc4d4;
+  --good:#5cc78a; --bad:#f08a84; --est-bg:#3a2f14; --est-text:#f2c46b;
+  --tip:#f4f3ef; --tip-text:#121211;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 60px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:34px;line-height:1.1;margin:4px 0 6px}
+.sub{color:var(--text2);font-size:13px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:0;z-index:5;background:var(--page);padding:10px 0;margin-bottom:10px;border-bottom:1px solid var(--line)}
+.ctl{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+select{font:inherit;font-size:13px;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--text2);padding:6px 11px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--text);color:var(--card)}
+.spacer{flex:1}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;padding:7px 12px;cursor:pointer}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.main{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.card h2{font-size:14px;font-weight:600;margin:0}
+.card .desc{font-size:12px;color:var(--text2);margin:2px 0 10px}
+.k-label{font-size:12px;color:var(--text2)}
+.k-val{font-size:30px;font-weight:500;letter-spacing:-.01em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.k-delta{font-size:12px;font-variant-numeric:tabular-nums}
+.up{color:var(--good)} .down{color:var(--bad)} .flat{color:var(--text2)}
+.k-intl{border-top:3px solid var(--intl)} .k-all{border-top:3px solid var(--all)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--text2);margin-bottom:6px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.axis text{fill:var(--muted);font-size:11px}
+.gridline{stroke:var(--grid)}
+.baseline{stroke:var(--line)}
+.summary{border-left:3px solid var(--accent)}
+.summary p{margin:6px 0 0;font-size:14px;color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{text-align:right;font-weight:500;color:var(--text2);font-size:12px;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{text-align:right;padding:8px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+.tblwrap{overflow-x:auto}
+.est{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.04em;background:var(--est-bg);color:var(--est-text);border-radius:4px;padding:1px 5px;margin-left:6px}
+.hbar{display:grid;grid-template-columns:110px minmax(0,1fr) 48px;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+.hbar .track{height:12px;background:var(--grid);border-radius:4px;overflow:hidden}
+.hbar .fill{height:12px;border-radius:0 4px 4px 0}
+.hbar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--text2)}
+.note{font-size:12px;color:var(--text2);line-height:1.6}
+.note b{color:var(--text)}
+#tip{position:fixed;pointer-events:none;background:var(--tip);color:var(--tip-text);font-size:12px;padding:8px 10px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.18);opacity:0;transition:opacity .08s;z-index:50;min-width:140px}
+#tip .t{font-weight:600;margin-bottom:4px}
+#tip .r{display:flex;justify-content:space-between;gap:14px}
+#gate{position:fixed;inset:0;background:var(--page);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+#gate form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px;width:100%;max-width:340px;text-align:center}
+#gate input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--page);color:var(--text);margin:14px 0 10px}
+#gate button{width:100%;font:inherit;font-weight:600;padding:10px;border:0;border-radius:8px;background:var(--text);color:var(--card);cursor:pointer}
+#gate .err{color:var(--bad);font-size:12px;min-height:18px}
+#status{font-size:12px;color:var(--text2);margin:10px 0}
+.section-gap{margin-top:14px}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.main{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:480px){h1{font-size:28px}.k-val{font-size:24px}.hbar{grid-template-columns:90px minmax(0,1fr) 44px}}
+@media print{.controls .btn,.controls .seg,#tip{display:none}.controls{position:static}body{background:#fff}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div id="gate"><form id="gateForm" autocomplete="off">
+  <div class="eyebrow">Private report</div>
+  <h1 style="font-size:26px">Elite Beach Villas</h1>
+  <div class="sub">Enter the team password to view</div>
+  <input id="pw" type="password" placeholder="Password" aria-label="Password">
+  <div class="err" id="pwErr"></div>
+  <button type="submit">View report</button>
+</form></div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div>
+      <div class="eyebrow">Social media performance</div>
+      <h1 id="title">Elite Beach Villas Social Media Report</h1>
+      <div class="sub" id="subtitle">Loading data</div>
+    </div>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Filters">
+    <label class="ctl">Platform <select id="fPlatform"></select></label>
+    <div class="ctl">Period
+      <div class="seg" id="fRange">
+        <button data-n="3" aria-pressed="false">3M</button>
+        <button data-n="6" aria-pressed="false">6M</button>
+        <button data-n="12" aria-pressed="true">12M</button>
+        <button data-n="0" aria-pressed="false">All</button>
+      </div>
+    </div>
+    <label class="ctl">Month <select id="fMonth"></select></label>
+    <span class="spacer"></span>
+    <button class="btn" id="btnTheme" type="button">Dark mode</button>
+    <button class="btn" id="btnPrint" type="button">Save as PDF</button>
+  </div>
+  <div id="status"></div>
+
+  <section class="grid kpis" id="kpis"></section>
+
+  <section class="card summary section-gap" id="summaryCard" hidden>
+    <h2>Monthly summary</h2>
+    <p id="summaryText"></p>
+  </section>
+
+  <section class="grid main section-gap">
+    <div class="card">
+      <h2>Monthly growth rate</h2>
+      <div class="desc">Percent change in followers each month. Faded blue bars use an estimated country split.</div>
+      <div class="legend"><span><i class="sw" style="background:var(--all)"></i>All followers</span><span><i class="sw" style="background:var(--intl)"></i>Excluding Costa Rica</span></div>
+      <div class="chart" id="cGrowth"></div>
+    </div>
+    <div class="card">
+      <h2>Where followers are</h2>
+      <div class="desc" id="countryDesc">Share of followers by country</div>
+      <div id="cCountries"></div>
+    </div>
+  </section>
+
+  <section class="grid two section-gap">
+    <div class="card">
+      <h2>Followers excluding Costa Rica</h2>
+      <div class="desc">Month end count. Dashed points are estimates.</div>
+      <div class="chart" id="cIntl"></div>
+    </div>
+    <div class="card">
+      <h2>All followers</h2>
+      <div class="desc">Month end count, all countries.</div>
+      <div class="chart" id="cAll"></div>
+    </div>
+  </section>
+
+  <section class="grid two section-gap">
+    <div class="card">
+      <h2>Followers gained vs lost</h2>
+      <div class="desc">New follows and unfollows each month. The gap is net growth.</div>
+      <div class="legend"><span><i class="sw" style="background:var(--intl)"></i>Gained</span><span><i class="sw" style="background:var(--all)"></i>Lost</span></div>
+      <div class="chart" id="cFlow"></div>
+    </div>
+    <div class="card">
+      <h2>Activity</h2>
+      <div class="desc">Monthly totals for the selected metric. Instagram only.</div>
+      <div class="seg" id="fMetric" style="margin-bottom:8px;flex-wrap:wrap">
+        <button data-m="reach" aria-pressed="true">Reach</button>
+        <button data-m="views" aria-pressed="false">Views</button>
+        <button data-m="interactions" aria-pressed="false">Interactions</button>
+        <button data-m="er" aria-pressed="false">Engagement rate</button>
+        <button data-m="profile_visits" aria-pressed="false">Profile visits</button>
+        <button data-m="link_clicks" aria-pressed="false">Link clicks</button>
+      </div>
+      <div class="chart" id="cActivity"></div>
+    </div>
+  </section>
+
+  <section class="card section-gap">
+    <h2>Month by month</h2>
+    <div class="desc">Full report and corrected report side by side.</div>
+    <div class="tblwrap"><table id="tbl"></table></div>
+  </section>
+
+  <section class="card section-gap">
+    <h2>How the corrected numbers are calculated</h2>
+    <p class="note">
+      <b>Followers excluding Costa Rica</b> = all followers × (100% − Costa Rica share).<br>
+      <b>Net new excluding Costa Rica</b> = this month minus last month, both calculated the same way. This counts only followers gained outside Costa Rica, so growth is never inflated.<br>
+      <b>Growth excluding Costa Rica</b> = net new excluding Costa Rica ÷ last month's followers excluding Costa Rica.<br>
+      <b>Total followers</b> for past months are rebuilt from today's count minus each month's follows and unfollows, as reported by Meta Business Suite.<br>
+      <b>Engagement rate</b> = interactions ÷ reach. It rises when reach falls, so read it together with reach.<br>
+      Months marked <span class="est">EST</span> use an estimated country split (today's split) because Meta only shows the current audience snapshot. Until real monthly snapshots build up, growth excluding Costa Rica equals overall growth for those months. Months marked <span class="est">PARTIAL</span> are month to date.
+    </p>
+  </section>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+(function(){
+const CFG = Object.assign({SHEET_CSV_URL:"",PASSWORD_HASH:"",LOCAL_COUNTRY_COLUMN:"country_costa_rica",TITLE:""}, window.EBV_CONFIG||{});
+const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- theme ---------- */
+const btnTheme=document.getElementById('btnTheme');
+function applyTheme(t){ if(t) document.documentElement.setAttribute('data-theme',t); else document.documentElement.removeAttribute('data-theme'); btnTheme.textContent = isDark()?'Light mode':'Dark mode'; }
+function isDark(){ const t=document.documentElement.getAttribute('data-theme'); if(t) return t==='dark'; return matchMedia('(prefers-color-scheme: dark)').matches; }
+applyTheme(store.get('ebv_theme'));
+btnTheme.onclick=()=>{ const t=isDark()?'light':'dark'; store.set('ebv_theme',t); applyTheme(t); render(); };
+document.getElementById('btnPrint').onclick=()=>window.print();
+
+/* ---------- password gate ---------- */
+async function sha256(s){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+function unlock(){ document.getElementById('gate').style.display='none'; document.getElementById('app').hidden=false; start(); }
+if(!CFG.PASSWORD_HASH || store.get('ebv_auth')===CFG.PASSWORD_HASH){ unlock(); }
+else {
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('gateForm').onsubmit=async e=>{ e.preventDefault(); const h=await sha256(document.getElementById('pw').value.trim());
+    if(h===CFG.PASSWORD_HASH){ store.set('ebv_auth',h); unlock(); } else document.getElementById('pwErr').textContent='Incorrect password'; };
+}
+
+/* ---------- data ---------- */
+function parseCSV(text){
+  const rows=[]; let row=[], f='', q=false;
+  for(let i=0;i<text.length;i++){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true; else if(c===','){row.push(f);f='';} else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; row.push(f); rows.push(row); row=[]; f=''; } else f+=c; }
+  if(f!==''||row.length){row.push(f);rows.push(row);}
+  const head=(rows.shift()||[]).map(h=>h.trim().toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''));
+  return rows.filter(r=>r.some(x=>x.trim()!=='')).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]||'').trim()])));
+}
+const num=v=>{ if(v==null) return null; const s=String(v).replace(/[,%\s$]/g,''); if(s==='') return null; const n=Number(s); return isFinite(n)?n:null; };
+function normMonth(v){ v=String(v).trim(); let m=v.match(/^(\d{4})[-\/](\d{1,2})/); if(m) return m[1]+'-'+m[2].padStart(2,'0');
+  m=v.match(/^(\d{1,2})\/(?:\d{1,2}\/)?(\d{4})$/); if(m) return m[2]+'-'+m[1].padStart(2,'0');
+  const d=new Date(v); if(!isNaN(d)) return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); return null; }
+function toRecords(rows){
+  return rows.map(r=>{ const countries={}; for(const k in r) if(k.startsWith('country_')){ const n=num(r[k]); if(n!=null) countries[k]=n; }
+    return { month:normMonth(r.month), platform:(r.platform||'Instagram').trim()||'Instagram', followers:num(r.followers), countries,
+      reach:num(r.reach), profile_visits:num(r.profile_visits), link_clicks:num(r.link_clicks), views:num(r.views), interactions:num(r.interactions), follows:num(r.follows), unfollows:num(r.unfollows), partial:/^(y|yes|true|1)/i.test(r.partial||''),
+      estimated:/^(y|yes|true|1|est)/i.test(r.estimated||''), notes:r.notes||'' };
+  }).filter(r=>r.month && r.followers!=null);
+}
+async function loadData(){
+  const srcs=[CFG.SHEET_CSV_URL,'data.csv'].filter(Boolean);
+  for(const s of srcs){ try{ const res=await fetch(s,{cache:'no-store'}); if(!res.ok) continue; const recs=toRecords(parseCSV(await res.text())); if(recs.length) return {recs,src:s}; }catch(e){} }
+  return {recs:[],src:null};
+}
+
+/* ---------- state ---------- */
+let ALL=[], S={platform:null,range:12,month:null,metric:'reach'}, SRC=null;
+const LOCAL=CFG.LOCAL_COUNTRY_COLUMN;
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const mLabel=(m,long)=>{ const [y,mo]=m.split('-'); return MN[+mo-1]+(long?' '+y:''); };
+const fmt=n=>n==null?'–':Math.round(n).toLocaleString('en-US');
+const pct=(n,d=2)=>n==null?'–':(n>0?'+':'')+n.toFixed(d)+'%';
+const signed=n=>n==null?'–':(n>0?'+':'')+Math.round(n).toLocaleString('en-US');
+
+function derive(recs){
+  recs=recs.slice().sort((a,b)=>a.month<b.month?-1:1);
+  return recs.map((r,i)=>{ const lp=r.countries[LOCAL]; const share=lp==null?null:(100-lp);
+    const intl=share==null?null:r.followers*share/100; const p=recs[i-1];
+    const pIntl=p&&p.countries[LOCAL]!=null?p.followers*(100-p.countries[LOCAL])/100:null;
+    return Object.assign({},r,{share,intl, er:(r.interactions!=null&&r.reach)?r.interactions/r.reach*100:null,
+      netAll:p?r.followers-p.followers:null, gAll:p?(r.followers-p.followers)/p.followers*100:null,
+      netIntl:(p&&pIntl!=null&&intl!=null)?intl-pIntl:null, gIntl:(p&&pIntl&&intl!=null)?(intl-pIntl)/pIntl*100:null});
+  });
+}
+function view(){
+  const rows=derive(ALL.filter(r=>r.platform===S.platform));
+  const endIdx=rows.findIndex(r=>r.month===S.month); const end=endIdx>=0?endIdx:rows.length-1;
+  const start=S.range? Math.max(0,end-S.range+1):0;
+  return {rows:rows.slice(start,end+1), cur:rows[end], prev:rows[end-1]};
+}
+
+/* ---------- tooltip ---------- */
+const tip=document.getElementById('tip');
+function showTip(e,title,lines){ tip.innerHTML='<div class="t">'+title+'</div>'+lines.map(l=>'<div class="r"><span>'+(l[2]?'<i class="sw" style="background:'+l[2]+'"></i>':'')+l[0]+'</span><b>'+l[1]+'</b></div>').join(''); tip.style.opacity=1; moveTip(e); }
+function moveTip(e){ const w=tip.offsetWidth,h=tip.offsetHeight; let x=e.clientX+14,y=e.clientY+14; if(x+w>innerWidth-8) x=e.clientX-w-14; if(y+h>innerHeight-8) y=e.clientY-h-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.style.opacity=0; }
+
+/* ---------- charts (dependency free SVG) ---------- */
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function niceTicks(lo,hi,n=4){ if(lo===hi){lo-=1;hi+=1;} const span=hi-lo, step0=span/n, mag=Math.pow(10,Math.floor(Math.log10(step0))); const step=[1,2,2.5,5,10].map(s=>s*mag).find(s=>s>=step0);
+  const a=Math.floor(lo/step)*step, b=Math.ceil(hi/step)*step; const t=[]; for(let v=a;v<=b+step/2;v+=step) t.push(+v.toFixed(6)); return t; }
+function frame(el,H){ const W=Math.max(280,el.clientWidth||600); return {W,H,L:52,R:12,T:10,B:26}; }
+function xLabels(rows,f,xAt){ const every=Math.ceil(rows.length/(f.W<520?6:12)); const last=rows.length-1; return rows.map((r,i)=>(i===last||(i%every===0&&last-i>=Math.max(1,every*0.6)))?'<text x="'+xAt(i)+'" y="'+(f.H-6)+'" text-anchor="middle">'+mLabel(r.month)+(r.month.endsWith('-01')||i===0?" '"+r.month.slice(2,4):'')+'</text>':'').join(''); }
+
+function lineChart(el,rows,key,color,fmtY,label,estDash){
+  const f=frame(el,220); const vals=rows.map(r=>r[key]); const valid=vals.filter(v=>v!=null);
+  if(!valid.length){ el.innerHTML='<div class="note">No data for this metric yet.</div>'; return; }
+  const ticks=niceTicks(Math.min(...valid),Math.max(...valid)); const lo=ticks[0],hi=ticks[ticks.length-1];
+  const iw=f.W-f.L-f.R, ih=f.H-f.T-f.B; const xAt=i=>f.L+(rows.length===1?iw/2:i*iw/(rows.length-1)); const yAt=v=>f.T+ih-(v-lo)/(hi-lo)*ih;
+  let s='<svg viewBox="0 0 '+f.W+' '+f.H+'" role="img" aria-label="'+label+'"><g class="axis">';
+  ticks.forEach(t=>{ s+='<line class="gridline" x1="'+f.L+'" x2="'+(f.W-f.R)+'" y1="'+yAt(t)+'" y2="'+yAt(t)+'"/><text x="'+(f.L-8)+'" y="'+(yAt(t)+4)+'" text-anchor="end">'+fmtY(t,true)+'</text>'; });
+  s+=xLabels(rows,f,xAt)+'</g>';
+  // segments: dashed when either end is estimated
+  for(let i=1;i<rows.length;i++){ if(vals[i]==null||vals[i-1]==null) continue; const dash=estDash&&(rows[i].estimated||rows[i-1].estimated);
+    s+='<line x1="'+xAt(i-1)+'" y1="'+yAt(vals[i-1])+'" x2="'+xAt(i)+'" y2="'+yAt(vals[i])+'" stroke="'+color+'" stroke-width="2" stroke-linecap="round"'+(dash?' stroke-dasharray="4 4"':'')+'/>'; }
+  rows.forEach((r,i)=>{ if(vals[i]==null) return; s+='<circle cx="'+xAt(i)+'" cy="'+yAt(vals[i])+'" r="4" fill="'+(estDash&&r.estimated?css('--card'):color)+'" stroke="'+color+'" stroke-width="2"/>'; });
+  const li=vals.length-1; if(vals[li]!=null) s+='<text x="'+Math.min(xAt(li),f.W-f.R)+'" y="'+(yAt(vals[li])-10)+'" text-anchor="end" style="fill:var(--text);font-size:12px;font-weight:600">'+fmtY(vals[li])+'</text>';
+  s+='<line class="xh" x1="0" x2="0" y1="'+f.T+'" y2="'+(f.T+ih)+'" stroke="'+css('--muted')+'" stroke-dasharray="2 3" opacity="0"/>';
+  rows.forEach((r,i)=>{ const x0=i===0?f.L:(xAt(i-1)+xAt(i))/2, x1=i===rows.length-1?f.W-f.R:(xAt(i)+xAt(i+1))/2; s+='<rect data-i="'+i+'" x="'+x0+'" y="'+f.T+'" width="'+(x1-x0)+'" height="'+ih+'" fill="transparent"/>'; });
+  el.innerHTML=s+'</svg>';
+  const xh=el.querySelector('.xh');
+  el.querySelectorAll('rect[data-i]').forEach(rc=>{ const i=+rc.dataset.i; const r=rows[i];
+    rc.addEventListener('mousemove',e=>{ xh.setAttribute('x1',xAt(i)); xh.setAttribute('x2',xAt(i)); xh.setAttribute('opacity',1);
+      showTip(e,mLabel(r.month,true)+(estDash&&r.estimated?' (est.)':'')+(r.partial?' (to date)':''),[[label,fmtY(vals[i]),color]]); });
+    rc.addEventListener('mouseleave',()=>{ xh.setAttribute('opacity',0); hideTip(); }); });
+}
+
+function growthChart(el,rows){
+  const f=frame(el,250); const A=rows.map(r=>r.gAll), I=rows.map(r=>r.gIntl); const all=[...A,...I].filter(v=>v!=null);
+  if(!all.length){ el.innerHTML='<div class="note">Growth appears once there are at least two months of data.</div>'; return; }
+  const ticks=niceTicks(Math.min(0,...all),Math.max(0,...all)); const lo=ticks[0],hi=ticks[ticks.length-1];
+  const iw=f.W-f.L-f.R, ih=f.H-f.T-f.B, band=iw/rows.length, bw=Math.max(3,Math.min(18,(band-10)/2));
+  const yAt=v=>f.T+ih-(v-lo)/(hi-lo)*ih, xAt=i=>f.L+band*i+band/2, y0=yAt(0);
+  const cA=css('--all'), cI=css('--intl');
+  let s='<svg viewBox="0 0 '+f.W+' '+f.H+'" role="img" aria-label="Monthly growth rate"><g class="axis">';
+  ticks.forEach(t=>{ s+='<line class="gridline" x1="'+f.L+'" x2="'+(f.W-f.R)+'" y1="'+yAt(t)+'" y2="'+yAt(t)+'"/><text x="'+(f.L-8)+'" y="'+(yAt(t)+4)+'" text-anchor="end">'+t.toFixed(t%1?1:0)+'%</text>'; });
+  s+=xLabels(rows,f,xAt)+'</g><line class="baseline" x1="'+f.L+'" x2="'+(f.W-f.R)+'" y1="'+y0+'" y2="'+y0+'"/>';
+  const bar=(x,v,c,op)=>{ if(v==null) return ''; const y=yAt(v), h=Math.abs(y-y0), top=Math.min(y,y0), r=Math.min(4,h/2,bw/2);
+    // round only the data end
+    const up=v>=0; const p = up
+      ? 'M'+x+','+(y0)+' V'+(top+r)+' Q'+x+','+top+' '+(x+r)+','+top+' H'+(x+bw-r)+' Q'+(x+bw)+','+top+' '+(x+bw)+','+(top+r)+' V'+y0+' Z'
+      : 'M'+x+','+y0+' V'+(y0+h-r)+' Q'+x+','+(y0+h)+' '+(x+r)+','+(y0+h)+' H'+(x+bw-r)+' Q'+(x+bw)+','+(y0+h)+' '+(x+bw)+','+(y0+h-r)+' V'+y0+' Z';
+    return '<path d="'+p+'" fill="'+c+'" opacity="'+op+'"/>'; };
+  rows.forEach((r,i)=>{ const cx=xAt(i), op=r.estimated?0.55:1; s+=bar(cx-bw-1,A[i],cA,1)+bar(cx+1,I[i],cI,op); });
+  rows.forEach((r,i)=>{ s+='<rect data-i="'+i+'" x="'+(f.L+band*i)+'" y="'+f.T+'" width="'+band+'" height="'+ih+'" fill="transparent"/>'; });
+  el.innerHTML=s+'</svg>';
+  el.querySelectorAll('rect[data-i]').forEach(rc=>{ const i=+rc.dataset.i, r=rows[i];
+    rc.addEventListener('mousemove',e=>showTip(e,mLabel(r.month,true)+(r.estimated?' (est.)':''),[['All followers',pct(A[i]),cA],['Excl. Costa Rica',pct(I[i]),cI],['Net new excl. CR',signed(r.netIntl)]]));
+    rc.addEventListener('mouseleave',hideTip); });
+}
+
+function flowChart(el,rows){
+  const f=frame(el,220); const F=rows.map(r=>r.follows), U=rows.map(r=>r.unfollows); const all=[...F,...U].filter(v=>v!=null);
+  if(!all.length){ el.innerHTML='<div class="note">No follow data yet.</div>'; return; }
+  const ticks=niceTicks(0,Math.max(...all)); const hi=ticks[ticks.length-1];
+  const iw=f.W-f.L-f.R, ih=f.H-f.T-f.B, band=iw/rows.length, bw=Math.max(3,Math.min(16,(band-10)/2));
+  const yAt=v=>f.T+ih-v/hi*ih, xAt=i=>f.L+band*i+band/2, y0=yAt(0), cF=css('--intl'), cU=css('--all');
+  let s='<svg viewBox="0 0 '+f.W+' '+f.H+'" role="img" aria-label="Followers gained vs lost"><g class="axis">';
+  ticks.forEach(t=>{ s+='<line class="gridline" x1="'+f.L+'" x2="'+(f.W-f.R)+'" y1="'+yAt(t)+'" y2="'+yAt(t)+'"/><text x="'+(f.L-8)+'" y="'+(yAt(t)+4)+'" text-anchor="end">'+t+'</text>'; });
+  s+=xLabels(rows,f,xAt)+'</g><line class="baseline" x1="'+f.L+'" x2="'+(f.W-f.R)+'" y1="'+y0+'" y2="'+y0+'"/>';
+  const bar=(x,v,c)=>{ if(v==null||v<=0) return ''; const y=yAt(v), r=Math.min(4,(y0-y)/2,bw/2); return '<path d="M'+x+','+y0+' V'+(y+r)+' Q'+x+','+y+' '+(x+r)+','+y+' H'+(x+bw-r)+' Q'+(x+bw)+','+y+' '+(x+bw)+','+(y+r)+' V'+y0+' Z" fill="'+c+'"/>'; };
+  rows.forEach((r,i)=>{ const cx=xAt(i); s+=bar(cx-bw-1,F[i],cF)+bar(cx+1,U[i],cU); });
+  rows.forEach((r,i)=>{ s+='<rect data-i="'+i+'" x="'+(f.L+band*i)+'" y="'+f.T+'" width="'+band+'" height="'+ih+'" fill="transparent"/>'; });
+  el.innerHTML=s+'</svg>';
+  el.querySelectorAll('rect[data-i]').forEach(rc=>{ const i=+rc.dataset.i, r=rows[i];
+    rc.addEventListener('mousemove',e=>showTip(e,mLabel(r.month,true)+(r.partial?' (to date)':''),[['Gained',fmt(F[i]),cF],['Lost',fmt(U[i]),cU],['Net',F[i]!=null&&U[i]!=null?signed(F[i]-U[i]):'–']]));
+    rc.addEventListener('mouseleave',hideTip); });
+}
+
+function countries(el,r){
+  const names={country_costa_rica:'Costa Rica',country_belgium:'Belgium',country_peru:'Peru',country_nicaragua:'Nicaragua',country_brazil:'Brazil',country_united_states:'United States',country_canada:'Canada',country_spain:'Spain',country_germany:'Germany',country_other:'Other',country_united_kingdom:'United Kingdom',country_france:'France',country_mexico:'Mexico'};
+  const nice=k=>names[k]||k.replace('country_','').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  const ent=Object.entries(r.countries).sort((a,b)=>(a[0]==='country_other')-(b[0]==='country_other')||b[1]-a[1]);
+  if(!ent.length){ el.innerHTML='<div class="note">Add country_ columns to the Sheet to see this breakdown.</div>'; return; }
+  const max=Math.max(...ent.map(e=>e[1]));
+  el.innerHTML=ent.map(([k,v])=>'<div class="hbar" data-k="'+k+'"><span>'+nice(k)+'</span><div class="track"><div class="fill" style="width:'+(v/max*100)+'%;background:'+(k===LOCAL?'var(--local)':'var(--intl)')+'"></div></div><span class="v">'+v.toFixed(1)+'%</span></div>').join('');
+  el.querySelectorAll('.hbar').forEach(b=>{ const k=b.dataset.k, v=r.countries[k];
+    b.addEventListener('mousemove',e=>showTip(e,nice(k),[['Share',v.toFixed(1)+'%'],['Approx. followers',fmt(r.followers*v/100)]])); b.addEventListener('mouseleave',hideTip); });
+  document.getElementById('countryDesc').textContent='Share of followers by country, '+mLabel(r.month,true)+(r.estimated?' (estimated)':'')+'. Costa Rica shown in gray.';
+}
+
+/* ---------- render ---------- */
+function kpi(label,val,delta,cls,accent){ return '<div class="card '+(accent||'')+'"><div class="k-label">'+label+'</div><div class="k-val">'+val+'</div><div class="k-delta '+cls+'">'+delta+'</div></div>'; }
+const dir=v=>v==null?'flat':v>0?'up':v<0?'down':'flat';
+const arrow=v=>v==null?'':v>0?'▲ ':v<0?'▼ ':'';
+function render(){
+  if(!ALL.length) return;
+  const {rows,cur}=view(); if(!cur) return;
+  const first=rows[0]; const shareChange=(cur.share!=null&&first.share!=null)?cur.share-first.share:null;
+  document.getElementById('kpis').innerHTML=
+    kpi('All followers',fmt(cur.followers),arrow(cur.gAll)+pct(cur.gAll)+' vs last month ('+signed(cur.netAll)+')',dir(cur.gAll),'k-all')+
+    kpi('Followers excluding Costa Rica',fmt(cur.intl),arrow(cur.gIntl)+pct(cur.gIntl)+' vs last month ('+signed(cur.netIntl)+')',dir(cur.gIntl),'k-intl')+
+    kpi('Reach',fmt(cur.reach),(()=>{const p=view().prev; if(!p||!p.reach||cur.reach==null) return '–'; const g=(cur.reach-p.reach)/p.reach*100; return arrow(g)+pct(g,1)+' vs last month'+(cur.partial?' (to date)':'');})(),(()=>{const p=view().prev; return p&&p.reach&&cur.reach!=null?dir(cur.reach-p.reach):'flat';})())+
+    kpi('Engagement rate',cur.er==null?'–':cur.er.toFixed(1)+'%','Interactions ÷ reach · '+fmt(cur.interactions)+' interactions','flat');
+  const sc=document.getElementById('summaryCard'); sc.hidden=!cur.notes; document.getElementById('summaryText').textContent=cur.notes;
+  growthChart(document.getElementById('cGrowth'),rows);
+  countries(document.getElementById('cCountries'),cur);
+  const k=v=>fmt(v);
+  lineChart(document.getElementById('cIntl'),rows,'intl',css('--intl'),k,'Excl. Costa Rica',true);
+  lineChart(document.getElementById('cAll'),rows,'followers',css('--all'),k,'All followers');
+  flowChart(document.getElementById('cFlow'),rows);
+  const mNames={reach:'Reach',views:'Views',interactions:'Interactions',er:'Engagement rate',profile_visits:'Profile visits',link_clicks:'Link clicks'};
+  lineChart(document.getElementById('cActivity'),rows,S.metric,css('--accent'),S.metric==='er'?(v=>v.toFixed(v%1?1:0)+'%'):k,mNames[S.metric]);
+  const t=document.getElementById('tbl');
+  const badges=r=>(r.estimated?'<span class="est" title="Country split estimated">EST</span>':'')+(r.partial?'<span class="est">PARTIAL</span>':'');
+  t.innerHTML='<thead><tr><th>Month</th><th>All followers</th><th>Gained</th><th>Lost</th><th>Net</th><th>Growth</th><th>Excl. Costa Rica</th><th>Net</th><th>Growth</th><th>Views</th><th>Reach</th><th>Interactions</th><th>Eng. rate</th><th>Profile visits</th><th>Link clicks</th></tr></thead><tbody>'+
+    rows.slice().reverse().map(r=>'<tr><td>'+mLabel(r.month,true)+badges(r)+'</td><td>'+fmt(r.followers)+'</td><td>'+fmt(r.follows)+'</td><td>'+fmt(r.unfollows)+'</td><td>'+signed(r.netAll)+'</td><td>'+pct(r.gAll)+'</td><td>'+fmt(r.intl)+'</td><td>'+signed(r.netIntl)+'</td><td>'+pct(r.gIntl)+'</td><td>'+fmt(r.views)+'</td><td>'+fmt(r.reach)+'</td><td>'+fmt(r.interactions)+'</td><td>'+(r.er==null?'–':r.er.toFixed(1)+'%')+'</td><td>'+fmt(r.profile_visits)+'</td><td>'+fmt(r.link_clicks)+'</td></tr>').join('')+'</tbody>';
+  document.getElementById('subtitle').textContent=S.platform+' · '+mLabel(first.month,true)+' to '+mLabel(cur.month,true)+' · Last update '+mLabel(ALL.filter(r=>r.platform===S.platform).map(r=>r.month).sort().pop(),true);
+}
+
+function segBind(id,attr,fn){ const g=document.getElementById(id); g.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); fn(b.dataset[attr]); render(); }); }
+
+async function start(){
+  if(CFG.TITLE) document.getElementById('title').textContent=CFG.TITLE;
+  const {recs,src}=await loadData(); ALL=recs; SRC=src;
+  const st=document.getElementById('status');
+  if(!recs.length){ st.textContent='No data found. Check the Google Sheet link in config.js.'; return; }
+  const isSample=recs.some(r=>/^sample data/i.test(r.notes));
+  st.innerHTML = isSample ? '<span class="est" style="font-size:12px;padding:4px 10px">SAMPLE DATA · NOT REAL EBV NUMBERS</span>' : (src==='data.csv' && !CFG.SHEET_CSV_URL ? 'Showing data.csv from the repository.' : '');
+  const plats=[...new Set(recs.map(r=>r.platform))]; S.platform=store.get('ebv_platform'); if(!plats.includes(S.platform)) S.platform=plats[0];
+  const fp=document.getElementById('fPlatform'); fp.innerHTML=plats.map(p=>'<option'+(p===S.platform?' selected':'')+'>'+p+'</option>').join('');
+  fp.onchange=()=>{ S.platform=fp.value; store.set('ebv_platform',fp.value); fillMonths(); render(); };
+  function fillMonths(){ const ms=[...new Set(recs.filter(r=>r.platform===S.platform).map(r=>r.month))].sort().reverse(); S.month=ms[0];
+    const fm=document.getElementById('fMonth'); fm.innerHTML=ms.map(m=>'<option value="'+m+'">'+mLabel(m,true)+'</option>').join(''); fm.onchange=()=>{S.month=fm.value; render();}; }
+  fillMonths();
+  segBind('fRange','n',v=>S.range=+v);
+  segBind('fMetric','m',v=>S.metric=v);
+  render();
+  let to; addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(render,120);});
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ applyTheme(document.documentElement.getAttribute('data-theme')); render(); });
+}
+})();
+</script>
+</body>
+</html>
