@@ -177,7 +177,7 @@ th:first-child,td:first-child{text-align:left}
   <section class="grid main">
     <div class="card">
       <h2>Monthly growth rate</h2>
-      <div class="desc">Percent change in followers each month. Faded blue bars use an estimated country split.</div>
+      <div class="desc">Percent change in followers each month. The excluding Costa Rica bar starts once two monthly snapshots exist.</div>
       <div class="legend"><span><i class="sw" style="background:var(--all)"></i>All followers</span><span><i class="sw" style="background:var(--intl)"></i>Excluding Costa Rica</span></div>
       <div class="chart" id="cGrowth"></div>
     </div>
@@ -191,7 +191,7 @@ th:first-child,td:first-child{text-align:left}
   <section class="grid two section-gap">
     <div class="card">
       <h2>Followers excluding Costa Rica</h2>
-      <div class="desc">Month end count. Dashed points are estimates.</div>
+      <div class="desc">Month end count, followers outside Costa Rica.</div>
       <div class="chart" id="cIntl"></div>
     </div>
     <div class="card">
@@ -233,7 +233,7 @@ th:first-child,td:first-child{text-align:left}
       <b>Growth excluding Costa Rica</b> = net new excluding Costa Rica ÷ last month's followers excluding Costa Rica.<br>
       <b>Total followers</b> for past months are rebuilt from today's count minus each month's follows and unfollows, as reported by Meta Business Suite.<br>
       <b>Engagement rate</b> = interactions ÷ reach. It rises when reach falls, so read it together with reach.<br>
-      Months marked <span class="est">EST</span> use an estimated country split (today's split) because Meta only shows the current audience snapshot. Until real monthly snapshots build up, growth excluding Costa Rica equals overall growth for those months. Months marked <span class="est">PARTIAL</span> are month to date.
+      Country split is only recorded from Sep 2026 onward, because Meta shows the current audience snapshot and keeps no history. Earlier months show no Costa Rica figures on purpose. Months marked <span class="est">PARTIAL</span> are month to date.
     </p>
   </section>
 </div>
@@ -397,7 +397,7 @@ function countries(el,r){
   const names={country_costa_rica:'Costa Rica',country_belgium:'Belgium',country_peru:'Peru',country_nicaragua:'Nicaragua',country_brazil:'Brazil',country_united_states:'United States',country_canada:'Canada',country_spain:'Spain',country_germany:'Germany',country_other:'Other',country_united_kingdom:'United Kingdom',country_france:'France',country_mexico:'Mexico'};
   const nice=k=>names[k]||k.replace('country_','').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
   const ent=Object.entries(r.countries).sort((a,b)=>(a[0]==='country_other')-(b[0]==='country_other')||b[1]-a[1]);
-  if(!ent.length){ el.innerHTML='<div class="note">Add country_ columns to the Sheet to see this breakdown.</div>'; return; }
+  if(!ent.length){ el.innerHTML='<div class="note">No country snapshot recorded for this month.</div>'; return; }
   const max=Math.max(...ent.map(e=>e[1]));
   el.innerHTML=ent.map(([k,v])=>'<div class="hbar" data-k="'+k+'"><span>'+nice(k)+'</span><div class="track"><div class="fill" style="width:'+(v/max*100)+'%;background:'+(k===LOCAL?'var(--local)':'var(--intl)')+'"></div></div><span class="v">'+v.toFixed(1)+'%</span></div>').join('');
   el.querySelectorAll('.hbar').forEach(b=>{ const k=b.dataset.k, v=r.countries[k];
@@ -430,7 +430,7 @@ function render(){
   lineChart(document.getElementById('cER'),rows,'er',css('--accent'),pctF,'Engagement rate',false,260);
   lineChart(document.getElementById('cVisits'),rows,'profile_visits',css('--accent'),k,'Profile visits');
   lineChart(document.getElementById('cClicks'),rows,'link_clicks',css('--accent'),k,'Link clicks');
-  lineChart(document.getElementById('cIntl'),rows,'intl',css('--intl'),k,'Excl. Costa Rica',true);
+  if(rows.filter(r=>r.intl!=null).length<2) document.getElementById('cIntl').innerHTML='<div class="note" style="padding:40px 0">Tracking starts with the Sep 2026 country snapshot. The trend appears once next month\'s snapshot is added.</div>'; else lineChart(document.getElementById('cIntl'),rows,'intl',css('--intl'),k,'Excl. Costa Rica',true);
   lineChart(document.getElementById('cAll'),rows,'followers',css('--all'),k,'All followers');
   flowChart(document.getElementById('cFlow'),rows);
   const mNames={views:'Views',interactions:'Interactions'};
